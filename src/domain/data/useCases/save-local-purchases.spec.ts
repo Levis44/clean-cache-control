@@ -48,13 +48,6 @@ describe("LocalSavePurchases", () => {
     await sut.save();
 
     expect(cacheStorage.deleteCounts).toBe(1);
-  });
-
-  test("Should call delete with correct key", async () => {
-    const { sut, cacheStorage } = makeSut();
-
-    await sut.save();
-
     expect(cacheStorage.key).toBe("purchases");
   });
 });
