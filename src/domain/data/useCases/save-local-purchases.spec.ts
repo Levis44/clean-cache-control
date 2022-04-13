@@ -10,6 +10,21 @@ interface ICacheStorage {
   delete(): void;
 }
 
+type SutTypes = {
+  sut: LocalSavePurchases;
+  cacheStorage: CacheStorageSpy;
+};
+
+const makeSut = (): SutTypes => {
+  const cacheStorage = new CacheStorageSpy();
+  const sut = new LocalSavePurchases(cacheStorage);
+
+  return {
+    sut,
+    cacheStorage,
+  };
+};
+
 class CacheStorageSpy implements ICacheStorage {
   deleteCounts = 0;
 
@@ -20,15 +35,13 @@ class CacheStorageSpy implements ICacheStorage {
 
 describe("LocalSavePurchases", () => {
   test("Should not delete cache on sut.init", () => {
-    const cacheStorage = new CacheStorageSpy();
-    new LocalSavePurchases(cacheStorage);
+    const { cacheStorage } = makeSut();
 
     expect(cacheStorage.deleteCounts).toBe(0);
   });
 
   test("Should delete old cache on sut.save", async () => {
-    const cacheStorage = new CacheStorageSpy();
-    const sut = new LocalSavePurchases(cacheStorage);
+    const { sut, cacheStorage } = makeSut();
 
     await sut.save();
 
