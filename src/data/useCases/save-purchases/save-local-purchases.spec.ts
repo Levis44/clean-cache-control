@@ -4,11 +4,17 @@ import { LocalSavePurchases } from "@/data/useCases/";
 class CacheStorageSpy implements ICacheStorage {
   deleteCallsCounts = 0;
   insertCallsCounts = 0;
-  key: string;
+  deleteKey: string;
+  insertKey: string;
 
   delete(key: string): void {
     this.deleteCallsCounts++;
-    this.key = key;
+    this.deleteKey = key;
+  }
+
+  insert(key: string): void {
+    this.insertCallsCounts++;
+    this.insertKey = key;
   }
 }
 
@@ -40,10 +46,10 @@ describe("LocalSavePurchases", () => {
     await sut.save();
 
     expect(cacheStorage.deleteCallsCounts).toBe(1);
-    expect(cacheStorage.key).toBe("purchases");
+    expect(cacheStorage.deleteKey).toBe("purchases");
   });
 
-  test("Should not insert new Cahce if delete fails", async () => {
+  test("Should not insert new Cahce if delete fails", () => {
     const { sut, cacheStorage } = makeSut();
 
     // mockamos o retorno desse método
@@ -60,5 +66,15 @@ describe("LocalSavePurchases", () => {
 
     expect(cacheStorage.insertCallsCounts).toBe(0);
     expect(promise).rejects.toThrow();
+  });
+
+  test("Should insert new Cahce if delete succeds", async () => {
+    const { sut, cacheStorage } = makeSut();
+
+    const promise = sut.save();
+
+    expect(cacheStorage.insertCallsCounts).toBe(1);
+    expect(cacheStorage.deleteCallsCounts).toBe(1);
+    expect(cacheStorage.insertKey).toBe("purchases");
   });
 });
