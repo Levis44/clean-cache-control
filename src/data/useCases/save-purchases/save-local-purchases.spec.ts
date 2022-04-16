@@ -19,6 +19,14 @@ class CacheStorageSpy implements ICacheStorage {
     this.insertKey = key;
     this.insertValues = value;
   }
+
+  simulateDeleteError(): void {
+    jest
+      .spyOn(CacheStorageSpy.prototype, "delete")
+      .mockImplementationOnce(() => {
+        throw new Error();
+      });
+  }
 }
 
 const mockPurchases = (): Array<SavePurchases.Params> => [
@@ -69,9 +77,7 @@ describe("LocalSavePurchases", () => {
     const { sut, cacheStorage } = makeSut();
 
     // mockamos o retorno desse método
-    jest.spyOn(cacheStorage, "delete").mockImplementationOnce(() => {
-      throw new Error();
-    });
+    cacheStorage.simulateDeleteError();
 
     // como ele vai cair na exceção, com um await não funcionaria
     // dentro do código isso seria tratado em um try catch, mas
