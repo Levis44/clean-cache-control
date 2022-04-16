@@ -27,6 +27,14 @@ class CacheStorageSpy implements ICacheStorage {
         throw new Error();
       });
   }
+
+  simulateInsertError(): void {
+    jest
+      .spyOn(CacheStorageSpy.prototype, "insert")
+      .mockImplementationOnce(() => {
+        throw new Error();
+      });
+  }
 }
 
 const mockPurchases = (): Array<SavePurchases.Params> => [
@@ -101,5 +109,15 @@ describe("LocalSavePurchases", () => {
     expect(cacheStorage.deleteCallsCounts).toBe(1);
     expect(cacheStorage.insertKey).toBe("purchases");
     expect(cacheStorage.insertValues).toEqual(purchases);
+  });
+
+  test("Should throw if insert throws", () => {
+    const { sut, cacheStorage } = makeSut();
+
+    cacheStorage.simulateInsertError();
+
+    const promise = sut.save(mockPurchases());
+
+    expect(promise).rejects.toThrow();
   });
 });
